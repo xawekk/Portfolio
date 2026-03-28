@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xawekk | Portfolio & Rezerwacje</title>
+    
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    
+    <style>
+        :root {
+            --color-black: #000000;
+            --color-medium-gray: #4A4A4A;
+            --color-gray: #888888;
+            --color-light-gray: #e0e0e0;
+            --color-off-white: #f5f5f5;
+            --color-white: #ffffff;
+            --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --radius-btn: 999px;
+            --radius-card: 22px; 
+            --radius-input: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font-main); background-color: var(--color-white); color: var(--color-black); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+        
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        .section-padding { padding: 80px 0; }
+        .hidden { display: none !important; }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 0.9rem 2.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: 1px solid var(--color-black);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: var(--radius-btn);
+            text-decoration: none;
+        }
+
+        .btn:hover { transform: scale(1.02); opacity: 0.9; }
+        .btn-outline { background-color: transparent; color: var(--color-black); border: 1px solid var(--color-light-gray); }
+
+        header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .nav-container { display: flex; justify-content: space-between; align-items: center; height: 70px; }
+        .logo { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { font-size: 0.85rem; font-weight: 500; color: var(--color-medium-gray); cursor: pointer; text-decoration: none; }
+
+        .hero { height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center; background: #fbfbfd; padding-top: 70px; }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 0.5rem; text-transform: lowercase; }
+        .hero p { font-size: 1.2rem; color: var(--color-gray); margin-bottom: 2.5rem; }
+
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        .gallery-item { aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--radius-card); cursor: pointer; background: #eee; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .gallery-item:hover img { transform: scale(1.05); }
+
+        .cta-section { background-color: var(--color-off-white); text-align: center; border-radius: 40px; margin: 0 2rem 80px; }
+
+        .booking-wrapper { max-width: 600px; margin: 0 auto; background: white; padding: 2.5rem; border-radius: var(--radius-card); border: 1px solid var(--color-light-gray); }
+        .form-group { margin-bottom: 1.2rem; text-align: left; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; color: var(--color-gray); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--color-light-gray); background: var(--color-off-white); border-radius: var(--radius-input); font-family: inherit; }
+
+        footer { padding: 40px 0; border-top: 1px solid var(--color-light-gray); text-align: center; }
+        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 15px; }
+        .footer-links a { font-size: 0.85rem; color: var(--color-gray); text-decoration: none; font-weight: 500; }
+        .footer-links a:hover { color: var(--color-black); }
+
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 2000; display: none; justify-content: center; align-items: center; cursor: zoom-out; }
+        .lightbox-img { max-width: 90%; max-height: 85vh; border-radius: var(--radius-card); box-shadow: 0 30px 60px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-container">
+            <div class="logo" onclick="switchView('main')">xawekk</div>
+            <nav class="nav-links">
+                <a data-i18n="nav-port" onclick="switchView('main'); scrollToSection('portfolio');">Portfolio</a>
+                <a data-i18n="nav-book" onclick="switchView('booking')">Rezerwacja</a>
+                <button id="lang-btn" class="btn btn-outline" style="padding: 0.4rem 1rem; font-size: 0.7rem;" onclick="toggleLanguage()">EN</button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-view">
+        <section class="hero">
+            <div class="container">
+                <h1>xawekk</h1>
+                <p data-i18n="hero-sub">Fotografia Artystyczna i Komercyjna</p>
+                <button class="btn" data-i18n="btn-book" onclick="switchView('booking')">Zarezerwuj Sesję</button>
+            </div>
+        </section>
+
+        <section id="portfolio" class="section-padding">
+            <div class="container">
+                <h2 style="margin-bottom: 40px; text-align: center;" data-i18n="port-title">Wybrane Prace</h2>
+                <div class="gallery-grid" id="gallery-grid"></div>
+            </div>
+        </section>
+
+        <section class="cta-section section-padding">
+            <div class="container">
+                <h2 style="margin-bottom: 20px;" data-i18n="cta-title">Gotowy na sesję?</h2>
+                <button class="btn" data-i18n="btn-contact" onclick="switchView('booking')">Napisz do mnie</button>
+            </div>
+        </section>
+    </main>
+
+    <main id="booking-view" class="hidden" style="padding-top: 120px; padding-bottom: 80px;">
+        <div class="container">
+            <div class="booking-wrapper">
+                <h2 style="margin-bottom: 2rem;" data-i18n="book-title">Rezerwacja Sesji</h2>
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="form-car-lbl">Model auta</label>
+                        <input type="text" name="car_model" class="form-control" data-i18n-ph="form-car-ph" placeholder="np. Porsche 911" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="form-name-lbl">Twoje Imię / Nick</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" data-i18n="form-phone-lbl">Telefon</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="+48 ..." required>
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;" data-i18n="form-submit">Wyślij zgłoszenie</button>
+                    <p style="margin-top: 1rem; font-size: 0.8rem; color: #888; cursor: pointer;" data-i18n="btn-back" onclick="switchView('main')">← Wróć do galerii</p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://www.instagram.com/xawekk/" target="_blank">Instagram</a>
+                <a href="https://www.tiktok.com/@igxawekk" target="_blank">TikTok</a>
+            </div>
+            <p style="font-size: 0.7rem; color: #aaa;">&copy; <span id="year"></span> xawekk.</p>
+        </div>
+    </footer>
+
+    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" class="lightbox-img" src="">
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                "nav-port": "Portfolio",
+                "nav-book": "Booking",
+                "hero-sub": "Automotive & Fine Art Photography",
+                "btn-book": "Book a Session",
+                "port-title": "Selected Works",
+                "cta-title": "Ready for a session?",
+                "btn-contact": "Contact me",
+                "book-title": "Session Booking",
+                "form-car-lbl": "Car Model",
+                "form-car-ph": "e.g. Porsche 911",
+                "form-name-lbl": "Your Name / Nickname",
+                "form-phone-lbl": "Phone",
+                "form-submit": "Send Request",
+                "btn-back": "← Back to gallery"
+            },
+            pl: {
+                "nav-port": "Portfolio",
+                "nav-book": "Rezerwacja",
+                "hero-sub": "Fotografia Artystyczna i Komercyjna",
+                "btn-book": "Zarezerwuj Sesję",
+                "port-title": "Wybrane Prace",
+                "cta-title": "Gotowy na sesję?",
+                "btn-contact": "Napisz do mnie",
+                "book-title": "Rezerwacja Sesji",
+                "form-car-lbl": "Model auta",
+                "form-car-ph": "np. Porsche 911",
+                "form-name-lbl": "Twoje Imię / Nick",
+                "form-phone-lbl": "Telefon",
+                "form-submit": "Wyślij zgłoszenie",
+                "btn-back": "← Wróć do galerii"
+            }
+        };
+
+        let currentLang = 'pl';
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'pl' : 'en';
+            document.getElementById('lang-btn').textContent = currentLang === 'en' ? 'PL' : 'EN';
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => { 
+                el.textContent = translations[currentLang][el.getAttribute('data-i18n')]; 
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { 
+                el.placeholder = translations[currentLang][el.getAttribute('data-i18n-ph')]; 
+            });
+        }
+
+        // TWOJA LISTA PLIKÓW - IDEALNIE ZGODNA Z GITHUBEM
+        const images = [
+            "IMG_5830.jpg", "IMG_5845.jpg", "IMG_5864.jpg", "IMG_6372.jpg",
+            "IMG_9824.jpg", "IMG_9827.jpg", "IMG_9859.jpg", "IMG_9884.jpg",
+            "IMG_9897.jpg", "IMG_9901.jpg", "IMG_9905.jpg", "IMG_9928.jpg"
+        ];
+
+        const grid = document.getElementById('gallery-grid');
+        images.forEach((src, idx) => {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+            div.innerHTML = `<img src="${src}" loading="lazy" alt="Foto ${idx+1}">`;
+            div.onclick = () => { 
+                document.getElementById('lightbox-img').src = src; 
+                document.getElementById('lightbox').style.display = 'flex'; 
+            };
+            grid.appendChild(div);
+        });
+
+        function switchView(v) {
+            document.getElementById('main-view').classList.toggle('hidden', v !== 'main');
+            document.getElementById('booking-view').classList.toggle('hidden', v !== 'booking');
+            window.scrollTo(0,0);
+        }
+
+        function scrollToSection(id) {
+            switchView('main');
+            setTimeout(() => { document.getElementById(id).scrollIntoView({behavior:'smooth'}); }, 50);
+        }
+
+        document.getElementById('bookingForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            await fetch('https://formspree.io/f/mkopojqj', { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+            alert('Dziękujemy! Skontaktujemy się wkrótce.');
+            switchView('main');
+        };
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
