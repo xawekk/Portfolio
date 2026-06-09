@@ -94,8 +94,52 @@
         .footer-links a { font-size: 0.85rem; color: var(--color-gray); text-decoration: none; font-weight: 500; }
         .footer-links a:hover { color: var(--color-black); }
 
-        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 2000; display: none; justify-content: center; align-items: center; cursor: zoom-out; }
-        .lightbox-img { max-width: 90%; max-height: 85vh; border-radius: var(--radius-card); box-shadow: 0 30px 60px rgba(0,0,0,0.1); }
+        /* NOWY STYL DIAPORAMY / LIGHTBOXA (STYL OTOMOTO) */
+        .lightbox { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(10, 10, 10, 0.98); 
+            z-index: 2000; display: none; justify-content: center; align-items: center; 
+            user-select: none;
+        }
+        .lightbox-wrapper { 
+            width: 100%; height: 85vh; overflow: hidden; position: relative; 
+        }
+        .lightbox-track { 
+            display: flex; width: 100%; height: 100%; 
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); 
+            will-change: transform; 
+        }
+        .lightbox-slide { 
+            min-width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 0 2rem; 
+        }
+        .lightbox-slide img { 
+            max-width: 100%; max-height: 100%; border-radius: var(--radius-card); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5); object-fit: contain; 
+        }
+        .lightbox-arrow { 
+            position: absolute; top: 50%; transform: translateY(-50%); 
+            background: rgba(255,255,255,0.08); border: none; color: white; 
+            font-size: 2.5rem; width: 60px; height: 60px; border-radius: 50%; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            transition: background 0.2s, transform 0.2s; z-index: 2100; 
+        }
+        .lightbox-arrow:hover { background: rgba(255,255,255,0.2); transform: translateY(-50%) scale(1.05); }
+        .lightbox-arrow.prev { left: 2rem; }
+        .lightbox-arrow.next { right: 2rem; }
+        
+        .lightbox-close { 
+            position: absolute; top: 2rem; right: 2rem; color: white; 
+            font-size: 1.5rem; cursor: pointer; z-index: 2100; width: 45px; height: 45px; 
+            display: flex; align-items: center; justify-content: center; 
+            background: rgba(255,255,255,0.08); border-radius: 50%; transition: background 0.2s;
+        }
+        .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+        
+        .lightbox-counter { 
+            position: absolute; top: 2rem; left: 50%; transform: translateX(-50%); 
+            color: rgba(255,255,255,0.85); font-size: 0.9rem; font-weight: 500; z-index: 2100; 
+            background: rgba(255,255,255,0.08); padding: 0.4rem 1.2rem; border-radius: 20px; backdrop-filter: blur(10px);
+        }
 
         @media (max-width: 768px) {
             .container { padding: 0 1rem; }
@@ -109,6 +153,13 @@
             .hero p { font-size: 1rem; padding: 0 1rem; }
             .cta-section { margin: 0 1rem 40px; border-radius: 20px; padding: 40px 1rem; }
             .booking-wrapper { padding: 1.5rem; }
+            
+            /* Zmiany mobilne dla slidera */
+            .lightbox-arrow { display: none; }
+            .lightbox-slide { padding: 0 1rem; }
+            .lightbox-slide img { border-radius: 12px; }
+            .lightbox-close { top: 1rem; right: 1rem; }
+            .lightbox-counter { top: 1rem; }
         }
     </style>
 </head>
@@ -183,8 +234,17 @@
         </div>
     </footer>
 
-    <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
-        <img id="lightbox-img" class="lightbox-img" src="">
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <div id="lightbox-counter" class="lightbox-counter">1 / 15</div>
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        
+        <button class="lightbox-arrow prev" onclick="prevImage(event)">&lsaquo;</button>
+        
+        <div class="lightbox-wrapper" onclick="closeLightbox()">
+            <div id="lightbox-track" class="lightbox-track"></div>
+        </div>
+        
+        <button class="lightbox-arrow next" onclick="nextImage(event)">&rsaquo;</button>
     </div>
 
     <script>
@@ -236,7 +296,6 @@
             });
         }
 
-        // ZAKTUALIZOWANA LISTA PLIKÓW - bez usuniętych zdjęć
         const images = [
             "IMG_5830.jpg", "IMG_5845.jpg", "IMG_5864.jpg",
             "ferari1.jpg", "ferari2.jpg", "ferari3.jpg", "ferari4.jpg", "ferari5.jpg",
@@ -244,7 +303,9 @@
             "DSC_0160.jpg", "DSC_0156.jpg", "DSC_0142.jpg"
         ];
 
+        let currentImgIdx = 0;
         const grid = document.getElementById('gallery-grid');
+        const lightboxTrack = document.getElementById('lightbox-track');
         
         const observerOptions = {
             root: null,
@@ -261,17 +322,95 @@
             });
         }, observerOptions);
 
+        // Generowanie galerii oraz automatyczne budowanie slajdów w tle
         images.forEach((src, idx) => {
+            // Miniaturka w siatce głównej
             const div = document.createElement('div');
             div.className = 'gallery-item';
             div.innerHTML = `<img src="${src}" loading="lazy" alt="Foto ${idx+1}">`;
-            div.onclick = () => { 
-                document.getElementById('lightbox-img').src = src; 
-                document.getElementById('lightbox').style.display = 'flex'; 
-            };
+            div.onclick = () => openLightbox(idx);
             grid.appendChild(div);
-            
             imageObserver.observe(div);
+
+            // Element wewnątrz suwaka lightboxa
+            const slide = document.createElement('div');
+            slide.className = 'lightbox-slide';
+            
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = `Foto ${idx+1}`;
+            // Zatrzymujemy propagację – kliknięcie bezpośrednio w zdjęcie nie zamyka widoku
+            img.onclick = (e) => e.stopPropagation(); 
+            
+            slide.appendChild(img);
+            lightboxTrack.appendChild(slide);
+        });
+
+        // FUNKCJE OBSŁUGI SLIDERA
+        function openLightbox(idx) {
+            currentImgIdx = idx;
+            updateLightboxPosition();
+            document.getElementById('lightbox').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Blokada skrolowania strony w tle
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+            document.body.style.overflow = ''; // Przywrócenie skrolowania strony
+        }
+
+        function updateLightboxPosition() {
+            lightboxTrack.style.transform = `translateX(-${currentImgIdx * 100}%)`;
+            document.getElementById('lightbox-counter').textContent = `${currentImgIdx + 1} / ${images.length}`;
+        }
+
+        function nextImage(e) {
+            if (e) e.stopPropagation();
+            if (currentImgIdx < images.length - 1) {
+                currentImgIdx++;
+            } else {
+                currentImgIdx = 0; // Powrót na początek po dojściu do końca
+            }
+            updateLightboxPosition();
+        }
+
+        function prevImage(e) {
+            if (e) e.stopPropagation();
+            if (currentImgIdx > 0) {
+                currentImgIdx--;
+            } else {
+                currentImgIdx = images.length - 1; // Przejście na koniec z pierwszego zdjęcia
+            }
+            updateLightboxPosition();
+        }
+
+        // SWIPE NA SMARTFONACH (Wydajne i płynne zdarzenia dotykowe)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const lightbox = document.getElementById('lightbox');
+
+        lightbox.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        lightbox.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            const swipeDistance = touchEndX - touchStartX;
+            
+            if (swipeDistance < -50) {
+                nextImage(); // Przesunięcie w lewo -> następne zdjęcie
+            } else if (swipeDistance > 50) {
+                prevImage(); // Przesunięcie w prawo -> poprzednie zdjęcie
+            }
+        }, {passive: true});
+
+        // NAWIGACJA KLAWIATURĄ
+        window.addEventListener('keydown', e => {
+            if (document.getElementById('lightbox').style.display === 'flex') {
+                if (e.key === 'ArrowRight') nextImage();
+                if (e.key === 'ArrowLeft') prevImage();
+                if (e.key === 'Escape') closeLightbox();
+            }
         });
 
         function switchView(v) {
